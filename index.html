@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盘搜 - 现代化的网盘资源搜索</title>
+    <meta name="description" content="一个现代、快速、精美的网盘资源搜索引擎，聚合多个搜索源。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="app-container">
+        <header class="header">
+            <h1 class="logo">Pan<span>Sou</span></h1>
+            <p class="subtitle">探索无限可能，触手可及的资源搜索</p>
+        </header>
+
+        <section class="search-section">
+            <div class="search-bar-wrapper glass">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="search-input" placeholder="输入关键词搜索资源..." autocomplete="off">
+                <button id="search-btn" class="primary-btn">
+                    <span>搜索</span>
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="quick-filter-wrapper">
+                <div class="filter-group">
+                    <div class="chip-group" id="cloud-types">
+                        <label class="chip"><input type="checkbox" value="baidu"><span>百度网盘</span></label>
+                        <label class="chip"><input type="checkbox" value="aliyun"><span>阿里云盘</span></label>
+                        <label class="chip"><input type="checkbox" value="quark"><span>夸克网盘</span></label>
+                        <label class="chip"><input type="checkbox" value="tianyi"><span>天翼云盘</span></label>
+                        <label class="chip"><input type="checkbox" value="uc"><span>UC网盘</span></label>
+                        <label class="chip"><input type="checkbox" value="pikpak"><span>PikPak</span></label>
+                        <label class="chip"><input type="checkbox" value="xunlei"><span>迅雷云盘</span></label>
+                        <label class="chip"><input type="checkbox" value="115"><span>115网盘</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-toggle-wrapper">
+                <button id="filter-toggle" class="ghost-btn">
+                    <i data-lucide="sliders-horizontal"></i>
+                    <span>高级筛选</span>
+                </button>
+            </div>
+
+            <div id="filter-panel" class="filter-panel glass hidden">
+                <div class="filter-group-row">
+                    <div class="filter-group">
+                        <h3>搜索来源</h3>
+                        <div class="chip-group" id="src-group">
+                            <label class="chip"><input type="radio" name="src" value="all"
+                                    checked><span>全部来源</span></label>
+                            <label class="chip"><input type="radio" name="src" value="tg"><span>Telegram</span></label>
+                            <label class="chip"><input type="radio" name="src" value="plugin"><span>插件源</span></label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <h3>搜索模式</h3>
+                        <div class="chip-group" id="res-group">
+                            <label class="chip"><input type="radio" name="res" value="merge"
+                                    checked><span>合并去重</span></label>
+                            <label class="chip"><input type="radio" name="res" value="results"><span>原始列表</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>关键词过滤</h3>
+                    <div class="input-row">
+                        <input type="text" id="include-words" placeholder="包含: 关键词A, 关键词B" class="glass-input">
+                        <input type="text" id="exclude-words" placeholder="排除: 排除词C, 排除词D" class="glass-input">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div id="status-indicator" class="status-indicator">
+                <!-- 搜索状态/加载动画会在这里显示 -->
+            </div>
+            <div class="results-wrapper">
+                <div id="tabs-container" class="tabs-container hidden"></div>
+                <div id="results-container" class="results-grid">
+                    <!-- 搜索结果卡片会动态插入到这里 -->
+                    <div class="empty-state">
+                        <i data-lucide="compass" class="huge-icon"></i>
+                        <p>在上方搜索框输入内容开始探索</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 自用盘搜.</p>
+    </footer>
+
+    <script src="script.js?v=1.0.0"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
