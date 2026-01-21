@@ -7,7 +7,7 @@ const API_ENDPOINT = 'https://ps.xxin.top/api/search';
 // DOM 元素
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
-const filterToggle = document.getElementById('filter-toggle');
+const advancedToggle = document.getElementById('advanced-toggle');
 const filterPanel = document.getElementById('filter-panel');
 const resultsContainer = document.getElementById('results-container');
 const statusIndicator = document.getElementById('status-indicator');
@@ -16,10 +16,12 @@ const statusIndicator = document.getElementById('status-indicator');
 let isSearching = false;
 
 /**
- * 切换筛选面板显示/隐藏
+ * 切换筛选面板显示/隐藏 (点击搜索框图标触发)
  */
-filterToggle.addEventListener('click', () => {
-    filterPanel.classList.toggle('hidden');
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'advanced-toggle' || e.target.closest('#advanced-toggle')) {
+        filterPanel.classList.toggle('hidden');
+    }
 });
 
 /**
@@ -166,29 +168,8 @@ function renderResults(responseData, resMode) {
 
     renderTabs();
     switchTab('all');
-
-    // 保存当前搜索状态到 sessionStorage
-    saveSearchState(responseData, resMode);
 }
 
-/**
- * 保存搜索状态
- */
-function saveSearchState(data, resMode) {
-    const state = {
-        data: data,
-        resMode: resMode,
-        kw: searchInput.value.trim(),
-        filters: {
-            cloud_types: Array.from(document.querySelectorAll('#cloud-types input:checked')).map(el => el.value),
-            src: document.querySelector('#src-group input:checked').value,
-            res: document.querySelector('#res-group input:checked').value,
-            include: document.getElementById('include-words').value,
-            exclude: document.getElementById('exclude-words').value
-        }
-    };
-    sessionStorage.setItem('last_search', JSON.stringify(state));
-}
 
 /**
  * 渲染 Tab 导航栏
@@ -227,9 +208,6 @@ function switchTab(tabId) {
         el.classList.toggle('active', el.dataset.tabId === tabId);
     });
 
-    // 记录当前 Tab
-    sessionStorage.setItem('last_tab', tabId);
-
     // 筛选数据
     const displayData = tabId === 'all' ? currentResults.all : (currentResults.byType[tabId] || []);
 
@@ -255,24 +233,41 @@ function createResultCard(item, index) {
     let linksHtml = '';
     if (item.links && item.links.length > 0) {
         linksHtml = item.links.map(link => {
-            let hostname = '';
-            try {
-                hostname = new URL(link.url).hostname;
-            } catch (e) {
-                hostname = 'unknown';
+            let iconUrl = '';
+            let isMagnet = link.type === 'magnet' || link.url.startsWith('magnet:');
+
+            if (!isMagnet) {
+                try {
+                    const hostname = new URL(link.url).hostname;
+                    if (hostname) {
+                        iconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+                    }
+                } catch (e) {
+                    // 忽略解析错误
+                }
             }
-            const iconUrl = hostname !== 'unknown'
-                ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
-                : '';
+
+            const iconHtml = isMagnet
+                ? `<i data-lucide="magnet" class="link-icon"></i>`
+                : (iconUrl ? `<img src="${iconUrl}" class="link-icon" alt="${link.type}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">` + `<i data-lucide="link" class="link-icon" style="display:none"></i>` : `<i data-lucide="link" class="link-icon"></i>`);
 
             return `
-            <a href="${link.url}" target="_blank" class="link-item">
+            <div class="link-item">
                 <div class="link-type">
-                    ${iconUrl ? `<img src="${iconUrl}" class="link-icon" alt="${link.type}">` : `<i data-lucide="link" class="link-icon"></i>`}
+                    ${iconHtml}
                     <span>${getCloudName(link.type)}</span>
                 </div>
-                ${link.password ? `<span class="badge">码: ${link.password}</span>` : '<i data-lucide="external-link" size="16"></i>'}
-            </a>
+                <a href="${link.url}" target="_blank" class="link-url" title="${link.url}">${link.url}</a>
+                <div class="link-actions">
+                    ${link.password ? `<span class="badge">码: ${link.password}</span>` : ''}
+                    <div class="copy-btn" onclick="copyToClipboard('${link.url}', this)" title="复制链接">
+                        <i data-lucide="copy" size="14"></i>
+                    </div>
+                    <a href="${link.url}" target="_blank" class="copy-btn" title="在新窗口打开">
+                        <i data-lucide="external-link" size="14"></i>
+                    </a>
+                </div>
+            </div>
             `;
         }).join('');
     }
@@ -297,18 +292,39 @@ function createResultCard(item, index) {
  */
 function getCloudName(type) {
     const names = {
-        baidu: '百度网盘',
-        aliyun: '阿里云盘',
-        quark: '夸克网盘',
-        tianyi: '天翼云盘',
-        uc: 'UC网盘',
+        baidu: '百度',
+        aliyun: '阿里',
+        quark: '夸克',
+        tianyi: '天翼',
+        uc: 'UC',
         pikpak: 'PikPak',
-        xunlei: '迅雷云盘',
-        115: '115网盘',
-        magnet: '磁力链接',
-        ed2k: '电驴链接'
+        xunlei: '迅雷',
+        115: '115',
+        magnet: '磁力',
+        ed2k: 'ed2k',
+        mobile: '移动',
+        123: '123盘',
     };
     return names[type] || type;
+}
+
+/**
+ * 复制文本到剪贴板
+ */
+async function copyToClipboard(text, btnElement) {
+    try {
+        await navigator.clipboard.writeText(text);
+        const originalIcon = btnElement.innerHTML;
+        btnElement.innerHTML = '<i data-lucide="check" size="14" style="color: #10b981;"></i>';
+        lucide.createIcons();
+        setTimeout(() => {
+            btnElement.innerHTML = originalIcon;
+            lucide.createIcons();
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        alert('复制失败，请手动选择复制');
+    }
 }
 
 // 绑定搜索事件
@@ -317,48 +333,3 @@ searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') performSearch();
 });
 
-/**
- * 页面加载时尝试恢复上次的搜索状态
- */
-window.addEventListener('load', () => {
-    const savedState = sessionStorage.getItem('last_search');
-    if (savedState) {
-        try {
-            const state = JSON.parse(savedState);
-
-            // 恢复关键词
-            searchInput.value = state.kw || '';
-
-            // 恢复筛选条件 (仅演示核心部分，您可以根据需要完善所有字段)
-            if (state.filters) {
-                // 恢复网盘类型勾选
-                document.querySelectorAll('#cloud-types input').forEach(el => {
-                    el.checked = state.filters.cloud_types.includes(el.value);
-                });
-
-                // 恢复来源模式
-                const srcEl = document.querySelector(`#src-group input[value="${state.filters.src}"]`);
-                if (srcEl) srcEl.checked = true;
-
-                const resEl = document.querySelector(`#res-group input[value="${state.filters.res}"]`);
-                if (resEl) resEl.checked = true;
-
-                document.getElementById('include-words').value = state.filters.include || '';
-                document.getElementById('exclude-words').value = state.filters.exclude || '';
-            }
-
-            // 渲染结果
-            renderResults(state.data, state.resMode);
-
-            // 恢复特定的 Tab (renderResults 默认会切到 'all'，所以这里显式调用 switchTab)
-            const savedTab = sessionStorage.getItem('last_tab');
-            if (savedTab && savedTab !== 'all') {
-                switchTab(savedTab);
-            }
-
-        } catch (e) {
-            console.error('Failed to restore search state:', e);
-            sessionStorage.removeItem('last_search');
-        }
-    }
-});

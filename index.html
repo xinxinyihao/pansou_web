@@ -33,37 +33,35 @@
 
         <section class="search-section">
             <div class="search-bar-wrapper glass">
-                <i data-lucide="search" class="search-icon"></i>
+                <i data-lucide="settings-2" class="search-icon" id="advanced-toggle" title="高级筛选"></i>
                 <input type="text" id="search-input" placeholder="输入关键词搜索资源..." autocomplete="off">
                 <button id="search-btn" class="primary-btn">
-                    <span>搜索</span>
+                    <!-- <span>搜索</span> -->
                     <i data-lucide="arrow-right"></i>
                 </button>
             </div>
 
-            <div class="quick-filter-wrapper">
-                <div class="filter-group">
-                    <div class="chip-group" id="cloud-types">
-                        <label class="chip"><input type="checkbox" value="baidu"><span>百度网盘</span></label>
-                        <label class="chip"><input type="checkbox" value="aliyun"><span>阿里云盘</span></label>
-                        <label class="chip"><input type="checkbox" value="quark"><span>夸克网盘</span></label>
-                        <label class="chip"><input type="checkbox" value="tianyi"><span>天翼云盘</span></label>
-                        <label class="chip"><input type="checkbox" value="uc"><span>UC网盘</span></label>
-                        <label class="chip"><input type="checkbox" value="pikpak"><span>PikPak</span></label>
-                        <label class="chip"><input type="checkbox" value="xunlei"><span>迅雷云盘</span></label>
-                        <label class="chip"><input type="checkbox" value="115"><span>115网盘</span></label>
+            <div id="filter-panel" class="filter-panel glass hidden">
+                <div class="quick-filter-wrapper">
+                    <div class="filter-group">
+                        <div class="chip-group" id="cloud-types">
+                            <label class="chip"><input type="checkbox" value="baidu"><span>百度</span></label>
+                            <label class="chip"><input type="checkbox" value="aliyun"><span>阿里</span></label>
+                            <label class="chip"><input type="checkbox" value="quark"><span>夸克</span></label>
+                            <label class="chip"><input type="checkbox" value="tianyi"><span>天翼</span></label>
+                            <label class="chip"><input type="checkbox" value="uc"><span>UC</span></label>
+                            <label class="chip"><input type="checkbox" value="pikpak"><span>PikPak</span></label>
+                            <label class="chip"><input type="checkbox" value="xunlei"><span>迅雷</span></label>
+                            <label class="chip"><input type="checkbox" value="115"><span>115</span></label>
+                            <label class="chip"><input type="checkbox" value="mobile"><span>移动</span></label>
+                            <label class="chip"><input type="checkbox" value="123pan"><span>123</span></label>
+                            <label class="chip"><input type="checkbox" value="magnet"><span>磁力</span></label>
+                            <label class="chip"><input type="checkbox" value="ed2k"><span>ed2k</span></label>
+
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="filter-toggle-wrapper">
-                <button id="filter-toggle" class="ghost-btn">
-                    <i data-lucide="sliders-horizontal"></i>
-                    <span>高级筛选</span>
-                </button>
-            </div>
-
-            <div id="filter-panel" class="filter-panel glass hidden">
                 <div class="filter-group-row">
                     <div class="filter-group">
                         <h3>搜索来源</h3>
@@ -115,7 +113,7 @@
         <p>© 2026 自用盘搜</p>
     </footer>
 
-    <script src="script.js?v=1.0.0"></script>
+    <script src="script.js?v=2.0.0"></script>
     <script>
         // 初始化图标
         lucide.createIcons();
