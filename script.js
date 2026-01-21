@@ -166,6 +166,28 @@ function renderResults(responseData, resMode) {
 
     renderTabs();
     switchTab('all');
+
+    // 保存当前搜索状态到 sessionStorage
+    saveSearchState(responseData, resMode);
+}
+
+/**
+ * 保存搜索状态
+ */
+function saveSearchState(data, resMode) {
+    const state = {
+        data: data,
+        resMode: resMode,
+        kw: searchInput.value.trim(),
+        filters: {
+            cloud_types: Array.from(document.querySelectorAll('#cloud-types input:checked')).map(el => el.value),
+            src: document.querySelector('#src-group input:checked').value,
+            res: document.querySelector('#res-group input:checked').value,
+            include: document.getElementById('include-words').value,
+            exclude: document.getElementById('exclude-words').value
+        }
+    };
+    sessionStorage.setItem('last_search', JSON.stringify(state));
 }
 
 /**
@@ -204,6 +226,9 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-item').forEach(el => {
         el.classList.toggle('active', el.dataset.tabId === tabId);
     });
+
+    // 记录当前 Tab
+    sessionStorage.setItem('last_tab', tabId);
 
     // 筛选数据
     const displayData = tabId === 'all' ? currentResults.all : (currentResults.byType[tabId] || []);
@@ -290,4 +315,50 @@ function getCloudName(type) {
 searchBtn.addEventListener('click', performSearch);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') performSearch();
+});
+
+/**
+ * 页面加载时尝试恢复上次的搜索状态
+ */
+window.addEventListener('load', () => {
+    const savedState = sessionStorage.getItem('last_search');
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+
+            // 恢复关键词
+            searchInput.value = state.kw || '';
+
+            // 恢复筛选条件 (仅演示核心部分，您可以根据需要完善所有字段)
+            if (state.filters) {
+                // 恢复网盘类型勾选
+                document.querySelectorAll('#cloud-types input').forEach(el => {
+                    el.checked = state.filters.cloud_types.includes(el.value);
+                });
+
+                // 恢复来源模式
+                const srcEl = document.querySelector(`#src-group input[value="${state.filters.src}"]`);
+                if (srcEl) srcEl.checked = true;
+
+                const resEl = document.querySelector(`#res-group input[value="${state.filters.res}"]`);
+                if (resEl) resEl.checked = true;
+
+                document.getElementById('include-words').value = state.filters.include || '';
+                document.getElementById('exclude-words').value = state.filters.exclude || '';
+            }
+
+            // 渲染结果
+            renderResults(state.data, state.resMode);
+
+            // 恢复特定的 Tab (renderResults 默认会切到 'all'，所以这里显式调用 switchTab)
+            const savedTab = sessionStorage.getItem('last_tab');
+            if (savedTab && savedTab !== 'all') {
+                switchTab(savedTab);
+            }
+
+        } catch (e) {
+            console.error('Failed to restore search state:', e);
+            sessionStorage.removeItem('last_search');
+        }
+    }
 });
